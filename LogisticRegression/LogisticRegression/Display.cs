@@ -100,5 +100,10 @@ namespace LogisticRegression
             }
             return Mean_STD;
         }
+        public void SplitTrainTestData(double[][] rawData, double percentForTrain, out double[][] train, out double[][] test)
+        {
+            train = rawData.Take((int)Math.Floor(rawData.Length * (percentForTrain / 100))).ToArray();
+            test = rawData.Skip((int)Math.Floor(rawData.Length * (percentForTrain / 100))).ToArray();
+        }
     }
 }
