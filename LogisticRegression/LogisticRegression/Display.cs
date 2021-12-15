@@ -104,6 +104,8 @@ namespace LogisticRegression
         {
             train = rawData.Take((int)Math.Floor(rawData.Length * (percentForTrain / 100))).ToArray();
             test = rawData.Skip((int)Math.Floor(rawData.Length * (percentForTrain / 100))).ToArray();
+
+            Console.WriteLine($"Creating train ({percentForTrain}%) and test ({100 - percentForTrain}%) matrices");
         }
     }
 }
