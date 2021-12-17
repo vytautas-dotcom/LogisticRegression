@@ -25,6 +25,36 @@ namespace LogisticRegression
             Console.WriteLine("      Age    Sex  Kidney Died");
             Console.WriteLine("=======================================");
             ShowData(rawData, 5, 2, true);
+
+            Console.WriteLine($"Split data: 80% for training, 20% for testing");
+            SplitTrainTestData(rawData, 80, out double[][] train, out double[][] test);
+
+            int numOfFeatures = 3;
+
+            LogisticClassifier logisticClassifier = new LogisticClassifier(numOfFeatures);
+            int maxEpochs = 100;
+
+            Console.WriteLine($"Training using simplex optimization through {maxEpochs} epochs");
+
+            double[] bestWeights = logisticClassifier.Train(train, maxEpochs);
+
+            Console.WriteLine("Best weights found:");
+            ShowVector(bestWeights, 4, true);
+
+            double trainAccuracy = logisticClassifier.Accuracy(train, bestWeights);
+            Console.WriteLine($"Prediction accuracy on training data = {trainAccuracy.ToString("F4")}");
+
+            double testAccuracy = logisticClassifier.Accuracy(test, bestWeights);
+            Console.WriteLine($"Prediction accuracy on testing data = {testAccuracy.ToString("F4")}");
+
+        }
+        static void ShowVector(double[] vector, int decimals, bool newLine)
+        {
+            for (int i = 0; i < vector.Length; ++i)
+                Console.Write(vector[i].ToString("F" + decimals) + " ");
+            Console.WriteLine("");
+            if (newLine == true)
+                Console.WriteLine("");
         }
         static void ShowData(double[][] data, int numRows, int decimals, bool indices)
         {
