@@ -114,5 +114,106 @@ namespace LogisticRegression
             }
             return sumSquaredError / trainData.Length;
         }
+
+        private class Solution : IComparable<Solution>
+        {
+            public double[] weights;
+            public double error;
+            public Solution(int numFeatures)
+            {
+                this.weights = new double[numFeatures + 1];
+                this.error = 0.0;
+            }
+            public int CompareTo(Solution other)
+            {
+                if (this.error < other.error)
+                    return -1;
+                else if (this.error > other.error)
+                    return 1;
+                else
+                    return 0;
+            }
+        }
+
+        public double[] Train(double[][] trainData, int maxEpochs)
+        {
+            rnd = new Random();
+
+            Solution[] solutions = new Solution[3];
+            for (int i = 0; i < 3; i++)
+            {
+                solutions[i] = new Solution(numFeatures);
+                solutions[i].weights = RandomPoint();
+                solutions[i].error = Error(trainData, solutions[i].weights);
+            }
+            int best = 0;
+            int good = 1;
+            int worst = 2;
+
+            int epoch = 0;
+
+            while(epoch < maxEpochs)
+            {
+                ++epoch;
+                Array.Sort(solutions);
+                double[] bestWeights = solutions[best].weights;
+                double[] goodWeights = solutions[good].weights;
+                double[] worstWeights = solutions[worst].weights;
+
+                double[] centroidWeights = Centroids(goodWeights, bestWeights);
+
+                double[] expandedWeights = Expanded(centroidWeights, worstWeights);
+                double expandedError = Error(trainData, expandedWeights);
+
+                if (expandedError < solutions[worst].error)
+                {
+                    Array.Copy(expandedWeights, worstWeights, numFeatures + 1);
+                    solutions[worst].error = expandedError;
+                    continue;
+                }
+
+                double[] reflectedWeights = Reflected(centroidWeights, worstWeights);
+                double reflectedError = Error(trainData, reflectedWeights);
+
+                if (reflectedError < solutions[worst].error)
+                {
+                    Array.Copy(reflectedWeights, worstWeights, numFeatures + 1);
+                    solutions[worst].error = reflectedError;
+                    continue;
+                }
+
+                double[] contractedWeights = Contracted(centroidWeights, worstWeights);
+                double contractedError = Error(trainData, contractedWeights);
+
+                if (contractedError < solutions[worst].error)
+                {
+                    Array.Copy(contractedWeights, worstWeights, numFeatures + 1);
+                    solutions[worst].error = contractedError;
+                    continue;
+                }
+
+                double[] randomPoint = RandomPoint();
+                double randomPointError = Error(trainData, randomPoint);
+
+                if (randomPointError < solutions[worst].error)
+                {
+                    Array.Copy(randomPoint, worstWeights, numFeatures + 1);
+                    solutions[worst].error = randomPointError;
+                    continue;
+                }
+
+                //SHRINK
+                //WORST TO BEST/GOOD TO BEST
+                for (int i = 0; i < numFeatures + 1; i++)
+                {
+                    worstWeights[i] = (worstWeights[i] + bestWeights[i]) * 0.5;
+                    goodWeights[i] = (goodWeights[i] + bestWeights[i]) * 0.5;
+                }
+                solutions[worst].error = Error(trainData, worstWeights);
+                solutions[good].error = Error(trainData, goodWeights);
+            }
+            Array.Copy(solutions[best].weights, this.weights, this.numFeatures + 1);
+            return this.weights;
+        }
     }
 }
